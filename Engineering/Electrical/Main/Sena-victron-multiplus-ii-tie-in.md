@@ -96,10 +96,10 @@ The differential voltage across the switch is measured between the generator sid
 | Units | 3× Victron MultiPlus-II 24/3000/70 120V |
 | Configuration | 3-phase wye (L1 master, L2 slave, L3 slave) |
 | AC output | 120/208V 3-phase wye 60Hz |
-| AC-OUT-1 rating | 75A per unit |
+| AC-OUT-1 rating | 35A per unit |
 | AC-IN rating | 50A per unit |
 | DC input | 24VDC |
-| Max charge current | 70A per unit |
+| Max charge current | 70A DC per unit |
 | Interconnect | VE.Bus RJ45 cables |
 | Configuration software | VE.Bus System Configurator + VEConfigure |
 
