@@ -1,0 +1,45 @@
+{
+  "name": "@signalk/mbtiles",
+  "version": "0.1.1",
+  "description": "Utilities and tilelive integration for the MBTiles format. FORK of @mapbox/mbtiles with sqlite3 dependency replaced with node:sqlite",
+  "keywords": [
+    "map",
+    "mbtiles"
+  ],
+  "licenses": [
+    {
+      "type": "BSD"
+    }
+  ],
+  "main": "./lib/mbtiles",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/signalk/node-mbtiles.git"
+  },
+  "contributors": [
+    "Tom MacWright <tmcw>",
+    "Will White <willwhite>",
+    "Dane Springmeyer <springmeyer>",
+    "Young Hahn <yhahn>",
+    "Konstantin Käfer <kkaefer>",
+    "Andrew Pendleton <apendleton>",
+    "Kai Dalgleish <kaibot3000>"
+  ],
+  "dependencies": {
+    "@mapbox/sphericalmercator": "~1.1.0",
+    "@mapbox/tiletype": "0.3.x",
+    "d3-queue": "~3.0.7"
+  },
+  "devDependencies": {
+    "eslint": "~5.16.0",
+    "eslint-config-unstyled": "^1.1.0",
+    "sinon": "^9.0.2",
+    "tape": "~4.10.1"
+  },
+  "engines": {
+    "node": ">= 22.5.0"
+  },
+  "scripts": {
+    "test": "eslint lib && tape test/*.js"
+  }
+}

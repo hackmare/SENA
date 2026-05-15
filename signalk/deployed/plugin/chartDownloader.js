@@ -272,6 +272,25 @@ class ChartDownloader {
                 url = url.replace('{bbox_3857}', `${mx1},${my1},${mx2},${my2}`);
             }
         }
+        // If URL looks like a bare WMS endpoint (no tile placeholders were replaced),
+        // auto-generate proper WMS GetMap request parameters
+        if (url === provider.remoteUrl) {
+            const [minLon, minLat, maxLon, maxLat] = (0, projection_1.tileToBBox)(tile.x, tile.y, tile.z);
+            const params = new URLSearchParams({
+                SERVICE: 'WMS',
+                REQUEST: 'GetMap',
+                VERSION: '1.1.1',
+                BBOX: `${minLon},${minLat},${maxLon},${maxLat}`,
+                CRS: 'EPSG:4326',
+                WIDTH: '256',
+                HEIGHT: '256',
+                LAYERS: provider.layers || '',
+                FORMAT: 'image/png',
+                STYLES: ''
+            });
+            const separator = url.includes('?') ? '&' : '?';
+            url = url + separator + params.toString();
+        }
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
         try {

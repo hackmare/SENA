@@ -1,0 +1,158 @@
+# Signal K server Charts plugin
+
+[![CI](https://github.com/SignalK/charts-plugin/actions/workflows/ci.yml/badge.svg)](https://github.com/SignalK/charts-plugin/actions/workflows/ci.yml)
+[![npm version](https://img.shields.io/npm/v/@signalk/charts-plugin.svg)](https://www.npmjs.com/package/@signalk/charts-plugin)
+[![License](https://img.shields.io/npm/l/@signalk/charts-plugin.svg)](https://github.com/SignalK/charts-plugin/blob/master/LICENSE)
+
+Signal K Node server plugin to provide chart metadata, such as name, description and location of the actual chart tile data.
+
+Chart metadata is derived from the following supported chart file types:
+
+- MBTiles _(.mbtiles)_
+- TMS _(tilemapresource.xml and tiles)_
+
+Additionally, chart metadata can be entered via the plugin configuration for other chart sources and types _(e.g. WMS, WMTS, S-57 tiles and tilejson)_.
+
+Chart metadata is made available to both v1 and v2 Signal K `resources` api paths.
+
+| Server Version | API | Path                               |
+| -------------- | --- | ---------------------------------- |
+| 1.x.x          | v1  | `/signalk/v1/api/resources/charts` |
+| 2.x.x          | v2  | `/signalk/v2/api/resources/charts` |
+
+_Note: Version 2 resource paths will only be made available on Signal K server v2.0.0 and later_
+
+## Usage
+
+1. Install `@signalk/signalk-charts` from the Signal K Server Appstore
+
+2. Configure the plugin in the Admin UI _(**Server -> Plugin Config -> Signal K Charts**)_
+
+3. Activate the plugin
+
+> [!TIP]
+> On Victron Venus devices you [need to install some dependencies manually](https://github.com/SignalK/charts-plugin/issues/40#issuecomment-3396744642) before installing the plugin.
+
+Chart metadata will then be available to client apps via the resources api `/resources/charts` for example:
+
+- [Freeboard SK](https://www.npmjs.com/package/@signalk/freeboard-sk)
+- [Tuktuk Chart Plotter](https://www.npmjs.com/package/tuktuk-chart-plotter)
+
+## Configuration
+
+### Local Chart Files
+
+To use chart files stored on the Signal K Server the plugin needs to know where your local chart files
+are stored to generate the chart metadata.
+
+You can either:
+
+1. Put the chart files in the default location _(`/home/<user>/.signalk/charts`)_
+2. Add configuration entries for the folders where the chart files are stored.
+
+<img src="https://user-images.githubusercontent.com/1435910/39382493-57c1e4dc-4a6e-11e8-93e1-cedb4c7662f4.png" alt="Chart paths configuration" width="450"/>
+
+The plugin watches each configured chart path and picks up new, renamed, or deleted chart files automatically, including files in nested subdirectories (e.g. `charts/<region>/<chart>.mbtiles`). Changes are applied after a short debounce (5 seconds by default) so bursts of events from file copies and atomic saves are collapsed into a single reload.
+
+> **Note:** File-system watching relies on native OS events. On some network mounts (SMB/NFS) events may be missed; if a chart doesn't appear after the debounce window, disable and re-enable the plugin.
+
+### Online chart providers
+
+If your chart source is not local to the Signal K Server you can add "Online Chart Providers" and enter the required charts metadata for the source.
+
+You will need to provide the following information:
+
+1. A chart name for client applications to display
+2. The URL to the chart source
+3. Select the chart image format
+4. The minimum and maximum zoom levels where chart data is available.
+
+You can also provide a description detailing the chart content.
+
+<img src="https://github.com/user-attachments/assets/77cb3aaf-5471-4e55-b05d-aad70cacab6a" alt="Online chart providers configuration" width="450"/>
+
+For WMS & WMTS sources you can specify the layers you wish to display.
+
+<img src="https://github.com/user-attachments/assets/b9bfba38-8468-4eca-aeb3-96a80fcbc7a6" alt="Online chart provider layers" width="450"/>
+
+A proxy for online charts can be created using the "Proxy through SignalK server" option. If enabled tiles will be fetched from the remote server and cached by the SignalK server making it possible to store the tiles for offline usage. Additional http headers can be passed to the remote server by adding colon separated headers, e.g. User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64). User-Agent is the header name and Mozilla... will be the value.
+
+#### URL placeholders
+
+The following placeholders are substituted in the chart URL when the proxy fetches each tile:
+
+| Placeholder   | Replaced with                                                                     |
+| ------------- | --------------------------------------------------------------------------------- |
+| `{z}`         | Tile zoom level                                                                   |
+| `{x}`         | Tile column                                                                       |
+| `{y}`         | Tile row (XYZ / Google / OSM scheme, origin at top-left)                          |
+| `{-y}`        | Tile row flipped to TMS scheme (origin at bottom-left)                            |
+| `{z-2}`       | Zoom minus 2, for NOAA WMTS sources served as a tilemap                           |
+| `{bbox}`      | Tile bounds in EPSG:4326, as `minLon,minLat,maxLon,maxLat` (WMS 1.1.1 axis order) |
+| `{bbox_3857}` | Tile bounds in EPSG:3857 / Web Mercator meters, as `minX,minY,maxX,maxY`          |
+
+`{bbox}` and `{bbox_3857}` make it possible to proxy and cache WMS sources that do not offer an XYZ endpoint. Prefer `{bbox_3857}` with WMS 1.3.0 endpoints, because WMS 1.3.0 requires `lat,lon` axis order for geographic CRSes such as EPSG:4326 and `{bbox}` always emits `lon,lat`.
+
+Example: NOAA Chart Display Service (S-57 ENC) as a cacheable tile source — set server type `tilelayer`, format `png`, proxy enabled, and use:
+
+```
+https://gis.charttools.noaa.gov/arcgis/rest/services/MCS/NOAAChartDisplay/MapServer/exts/MaritimeChartService/WMSServer?service=WMS&version=1.3.0&request=GetMap&layers=0,1,2,3,4,5,6,7,8,9,10,11,12&styles=&crs=EPSG:3857&bbox={bbox_3857}&width=256&height=256&format=image/png&transparent=true
+```
+
+### Supported chart formats
+
+- [MBTiles](https://github.com/mapbox/mbtiles-spec) files
+- Directory with cached [TMS](https://wiki.osgeo.org/wiki/Tile_Map_Service_Specification) tiles and `tilemapresource.xml`
+- Directory with XYZ tiles and `metadata.json`
+- Online [TMS](https://wiki.osgeo.org/wiki/Tile_Map_Service_Specification)
+
+Publicly available MBTiles charts can be found from:
+
+- [NOAA Nautical charts](https://distribution.charts.noaa.gov/ncds/index.html)
+- [Finnish Transport Agency nautical charts](https://github.com/vokkim/rannikkokartat-mbtiles)
+- [Signal K World Coastline Map](https://github.com/netAction/signalk-world-coastline-map), download [MBTiles release](https://github.com/netAction/signalk-world-coastline-map/releases/download/v1.0/signalk-world-coastline-map-database.tgz)
+
+---
+
+### API
+
+Plugin adds support for `/resources/charts` endpoints described in [Signal K specification](http://signalk.org/specification/1.0.0/doc/otherBranches.html#resourcescharts):
+
+#### List available charts
+
+```bash
+GET /signalk/v2/api/resources/charts/`
+```
+
+#### Return metadata for selected chart
+
+```bash
+
+GET /signalk/v2/api/resources/charts/${identifier}`
+```
+
+#### Chart Tiles
+
+Chart tiles are retrieved using the url defined in the chart metadata.
+
+For local chart files located in the Chart Path(s) defined in the plugin configuration, the url will be:
+
+```bash
+/signalk/chart-tiles/${identifier}/${z}/${x}/${y}
+```
+
+## License
+
+Copyright 2018 Mikko Vesikkala
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.

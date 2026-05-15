@@ -1,0 +1,35 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.isHistoryApi = void 0;
+exports.isHistoryProvider = isHistoryProvider;
+// Type-check test - verify ValuesResponse compiles correctly
+const _exampleValuesResponse = {
+    context: 'vessels.urn:mrn:signalk:uuid:2ffee4a6-52f6-4d4e-8179-0fc9aaf22c87',
+    range: {
+        from: '2025-08-11T05:26:04.888Z',
+        to: '2025-08-11T05:41:04.888Z'
+    },
+    values: [
+        {
+            path: 'navigation.speedOverGround',
+            method: 'average'
+        }
+    ],
+    data: [
+        ['2025-08-11T05:26:05.000Z', null],
+        ['2025-08-11T05:26:10.000Z', 3.14]
+    ]
+};
+void _exampleValuesResponse;
+function isHistoryProvider(obj) {
+    if (typeof obj !== 'object' || obj === null) {
+        return false;
+    }
+    return (typeof obj.getValues === 'function' &&
+        typeof obj.getContexts === 'function' &&
+        typeof obj.getPaths === 'function');
+}
+/**
+ * @deprecated Use {@link isHistoryProvider} instead.
+ */
+exports.isHistoryApi = isHistoryProvider;

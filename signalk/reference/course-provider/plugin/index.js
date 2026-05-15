@@ -1,0 +1,555 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const server_api_1 = require("@signalk/server-api");
+const alarms_1 = require("./lib/alarms");
+const delta_msg_1 = require("./lib/delta-msg");
+const path_1 = __importDefault(require("path"));
+const worker_threads_1 = require("worker_threads");
+const CONFIG_SCHEMA = {
+    properties: {
+        notifications: {
+            type: 'object',
+            title: 'Notifications',
+            description: 'Configure the options for generated notifications.',
+            properties: {
+                enableArrival: {
+                    type: 'boolean',
+                    title: 'Enable Arrival Circle Entered',
+                    default: true
+                },
+                enablePerpendicular: {
+                    type: 'boolean',
+                    title: 'Enable Perpendicular Passed',
+                    default: true
+                },
+                sound: {
+                    type: 'boolean',
+                    title: 'Enable sound',
+                    default: false
+                }
+            }
+        },
+        calculations: {
+            type: 'object',
+            title: 'Calculations',
+            description: 'Configure course calculations options.',
+            properties: {
+                method: {
+                    type: 'string',
+                    default: 'GreatCircle',
+                    enum: ['GreatCircle', 'Rhumbline']
+                }
+            }
+        }
+    }
+};
+const CONFIG_UISCHEMA = {
+    notifications: {
+        enableArrival: {
+            'ui:widget': 'checkbox',
+            'ui:title': 'Enable Arrival Circle Entered',
+            'ui:help': ''
+        },
+        enablePerpendicular: {
+            'ui:widget': 'checkbox',
+            'ui:title': 'Enable Perpendicular Passed',
+            'ui:help': ''
+        },
+        sound: {
+            'ui:widget': 'checkbox',
+            'ui:title': 'Enable sound',
+            'ui:help': ''
+        }
+    },
+    calculations: {
+        method: {
+            'ui:widget': 'radio',
+            'ui:title': 'Course calculation method',
+            'ui:help': ' '
+        }
+    }
+};
+const SRC_PATHS = [
+    'navigation.position',
+    'navigation.magneticVariation',
+    'navigation.headingTrue',
+    'navigation.courseOverGroundTrue',
+    'navigation.speedOverGround',
+    'environment.wind.angleTrueGround',
+    'navigation.datetime',
+    'navigation.course.arrivalCircle',
+    'navigation.course.startTime',
+    'navigation.course.targetArrivalTime',
+    'navigation.course.nextPoint',
+    'navigation.course.previousPoint',
+    'navigation.course.activeRoute',
+    'resources.routes.*'
+];
+const PATH_POSITION = 'navigation.position';
+const PATH_ACTIVE_ROUTE = 'navigation.course.activeRoute';
+const PATH_RESOURCES_ROUTE_PREFIX = 'resources.route';
+module.exports = (server) => {
+    const watchArrival = new alarms_1.Watcher(); // watch distance from arrivalCircle
+    const watchPassedDest = new alarms_1.Watcher(); // watch passedPerpendicular
+    watchPassedDest.rangeMin = 1;
+    watchPassedDest.rangeMax = 2;
+    let unsubscribes = []; // delta stream subscriptions
+    let obs = []; // Observables subscription
+    let worker = null;
+    const SIGNALK_API_PATH = `/signalk/v2/api`;
+    const COURSE_CALCS_PATH = `${SIGNALK_API_PATH}/vessels/self/navigation/course/calcValues`;
+    const srcPaths = {};
+    let courseCalcs;
+    let activeRouteId;
+    // Monotonic counter bumped whenever activeRoute.waypoints is (re)assigned.
+    // The worker keys its routeRemaining cache on this number so the cache
+    // survives the structured clone that worker.postMessage performs on every
+    // tick — array references would not.
+    let waypointsVersion = 0;
+    // Monotonic token bumped before every getWaypoints() fetch and on
+    // activeRoute clear. The handler that initiated a fetch only commits its
+    // result if its token is still the latest one, so concurrent or
+    // out-of-order fetches cannot let an older resource overwrite a newer one.
+    let routeFetchToken = 0;
+    let metaSent = false;
+    // ******** REQUIRED PLUGIN DEFINITION *******
+    const plugin = {
+        id: 'course-provider',
+        name: 'Course Data provider',
+        schema: () => CONFIG_SCHEMA,
+        uiSchema: () => CONFIG_UISCHEMA,
+        start: (options) => {
+            doStartup(options);
+        },
+        stop: () => {
+            doShutdown();
+        }
+    };
+    // ************************************
+    const cleanConfig = (options) => {
+        const defaultConfig = {
+            notifications: {
+                sound: false,
+                enableArrival: false,
+                enablePerpendicular: false
+            },
+            calculations: {
+                method: 'GreatCircle'
+            }
+        };
+        if (typeof options.notifications?.sound === 'undefined' &&
+            typeof options.calculations?.method === 'undefined') {
+            return defaultConfig;
+        }
+        if (typeof options.notifications?.enableArrival === 'undefined') {
+            options.notifications.enableArrival = true;
+        }
+        if (typeof options.notifications?.enablePerpendicular === 'undefined') {
+            options.notifications.enablePerpendicular = true;
+        }
+        return options;
+    };
+    let config;
+    const doStartup = (options) => {
+        try {
+            server.debug(`${plugin.name} starting.......`);
+            config = cleanConfig(options);
+            server.debug(`Applied config: ${JSON.stringify(config)}`);
+            // setup subscriptions
+            initSubscriptions(SRC_PATHS);
+            // setup worker(s)
+            initWorkers();
+            // setup routes
+            initEndpoints();
+            const msg = 'Started';
+            server.setPluginStatus(msg);
+            return undefined;
+        }
+        catch (error) {
+            const msg = 'Started with errors!';
+            server.setPluginError(msg);
+            server.error('** EXCEPTION: **');
+            server.error(error.stack);
+            return error;
+        }
+    };
+    const doShutdown = () => {
+        server.debug('** shutting down **');
+        server.debug('** Un-subscribing from events **');
+        unsubscribes.forEach((s) => s());
+        unsubscribes = [];
+        obs.forEach((o) => o.unsubscribe());
+        obs = [];
+        if (worker) {
+            server.debug('** Stopping Worker(s) **');
+            worker.removeAllListeners();
+            worker.terminate();
+            worker = null;
+        }
+        const msg = 'Stopped';
+        server.setPluginStatus(msg);
+    };
+    // *****************************************
+    // register DELTA stream message handler
+    const initSubscriptions = (skPaths) => {
+        server.debug('Initialising Stream Subscriptions....');
+        getPaths(skPaths);
+        const subscription = {
+            context: 'vessels.self',
+            subscribe: skPaths.map((p) => ({
+                path: p,
+                period: 500
+            }))
+        };
+        server.subscriptionmanager.subscribe(subscription, unsubscribes, (error) => {
+            server.error(`${plugin.id} Error: ${error}`);
+        }, (delta) => {
+            const updates = delta.updates;
+            if (!updates) {
+                return;
+            }
+            for (let i = 0, uLen = updates.length; i < uLen; i++) {
+                const u = updates[i];
+                if (!u || !(0, server_api_1.hasValues)(u)) {
+                    continue;
+                }
+                const values = u.values;
+                for (let j = 0, vLen = values.length; j < vLen; j++) {
+                    const v = values[j];
+                    const p = v.path;
+                    if (p === PATH_POSITION) {
+                        server.debug(`navigation.position ${JSON.stringify(v.value)} => calc()`);
+                        srcPaths[p] = v.value;
+                        calc();
+                    }
+                    else if (p === PATH_ACTIVE_ROUTE) {
+                        handleActiveRoute(v.value ? { ...v.value } : null);
+                    }
+                    else if (p.startsWith(PATH_RESOURCES_ROUTE_PREFIX)) {
+                        handleRouteUpdate(v);
+                    }
+                    else {
+                        srcPaths[p] = v.value;
+                    }
+                }
+            }
+        });
+        obs.push(watchArrival.change$.subscribe((event) => {
+            onArrivalCircleEvent(event);
+        }));
+        obs.push(watchPassedDest.change$.subscribe((event) => {
+            onPassedDestEvent(event);
+        }));
+    };
+    // initialise calculation worker(s)
+    const initWorkers = () => {
+        server.debug('Initialising worker thread....');
+        worker = new worker_threads_1.Worker(path_1.default.resolve(__dirname, './worker/course.js'));
+        worker.on('message', (msg) => {
+            calcResult(msg);
+        });
+        worker.on('error', (error) => console.error('** worker.error:', error));
+        worker.on('exit', (code) => {
+            if (code !== 0) {
+                console.error('** worker.exit:', `Stopped with exit code ${code}`);
+            }
+        });
+        worker.unref();
+    };
+    // initialise api endpoints
+    const initEndpoints = () => {
+        server.debug('Initialising API endpoint(s)....');
+        server.get(`${COURSE_CALCS_PATH}`, async (_req, res) => {
+            server.debug(`** GET ${COURSE_CALCS_PATH}`);
+            const calcs = config.calculations.method === 'Rhumbline'
+                ? courseCalcs?.rl
+                : courseCalcs?.gc;
+            if (!calcs) {
+                res.status(400).json({
+                    state: 'FAILED',
+                    statusCode: 400,
+                    message: `No active destination!`
+                });
+                return;
+            }
+            return res.status(200).json(calcs);
+        });
+    };
+    // ********* Course Calculations *******************
+    // retrieve initial values of target paths
+    const getPaths = async (paths) => {
+        paths.forEach((path) => {
+            const v = server.getSelfPath(path);
+            srcPaths[path] = v?.value ?? null;
+        });
+        const ci = await server.getCourse();
+        server.debug(`*** getPaths() ${JSON.stringify(ci)}`);
+        if (ci) {
+            srcPaths['navigation.course.nextPoint'] = ci.nextPoint;
+            srcPaths['navigation.course.previousPoint'] = ci.previousPoint;
+            srcPaths['activeRoute'] = ci.activeRoute;
+            if (ci.activeRoute) {
+                // split('/').slice(-1)[0] is structurally always defined on a
+                // non-empty string, but `noUncheckedIndexedAccess` types it as
+                // `string | undefined`. Empty fallback is unreachable in practice.
+                activeRouteId = ci.activeRoute.href.split('/').slice(-1)[0] ?? '';
+                const myToken = ++routeFetchToken;
+                const waypoints = await getWaypoints(activeRouteId);
+                // initSubscriptions does not await getPaths, so a delta fired during
+                // startup can complete its fetch first; drop our result if so.
+                if (myToken !== routeFetchToken) {
+                    return;
+                }
+                srcPaths['activeRoute'].waypoints = waypoints;
+                srcPaths['activeRoute'].waypointsVersion = ++waypointsVersion;
+            }
+        }
+        server.debug(`[srcPaths]: ${JSON.stringify(srcPaths)}`);
+    };
+    // retrieve waypoints for supplied route id
+    const getWaypoints = async (id) => {
+        const rte = (await server.resourcesApi.getResource('routes', id));
+        const waypoints = rte ? rte.feature.geometry.coordinates : [];
+        server.debug(`*** activeRoute waypoints *** ${waypoints}`);
+        return waypoints;
+    };
+    // resources.routes delta handler
+    const handleRouteUpdate = async (msg) => {
+        server.debug(`*** handleRouteUpdate *** ${JSON.stringify(msg)}`);
+        if (msg.path.endsWith(activeRouteId)) {
+            server.debug(`*** matched activeRouteId *** ${activeRouteId}`);
+            const myToken = ++routeFetchToken;
+            const waypoints = await getWaypoints(activeRouteId);
+            // A newer fetch (another resources.routes update or a route switch)
+            // has been issued in the meantime; drop our stale result.
+            if (myToken !== routeFetchToken) {
+                return;
+            }
+            srcPaths['activeRoute'].waypoints = waypoints;
+            srcPaths['activeRoute'].waypointsVersion = ++waypointsVersion;
+        }
+    };
+    // 'navigation.course.activeRoute' delta handler
+    const handleActiveRoute = async (value) => {
+        server.debug(`*** handleActiveRoute *** ${JSON.stringify(value)}`);
+        if (!value) {
+            // Bump the token so any in-flight fetch from a previous activation is
+            // ignored when it eventually resolves.
+            routeFetchToken++;
+            srcPaths['activeRoute'] = null;
+            activeRouteId = undefined;
+            return;
+        }
+        // Always derive activeRouteId from the incoming value so a switch from
+        // one route to another takes effect.
+        const newId = value.href.split('/').slice(-1)[0] ?? '';
+        activeRouteId = newId;
+        const myToken = ++routeFetchToken;
+        const waypoints = await getWaypoints(newId);
+        if (myToken !== routeFetchToken) {
+            return;
+        }
+        srcPaths['activeRoute'] = Object.assign({}, value, {
+            waypoints: waypoints,
+            waypointsVersion: ++waypointsVersion
+        });
+        server.debug(`*** activeRoute *** ${JSON.stringify(srcPaths['activeRoute'])}`);
+    };
+    // trigger course calculations
+    const calc = () => {
+        if (server.debug.enabled) {
+            server.debug(`*** navigation.position *** ${JSON.stringify(srcPaths['navigation.position'])}`);
+        }
+        if (srcPaths['navigation.position']) {
+            if (server.debug.enabled) {
+                server.debug(JSON.stringify(srcPaths));
+            }
+            worker?.postMessage(srcPaths);
+        }
+        else {
+            server.debug('No vessel position.....Skipping calc()');
+        }
+    };
+    // send calculation results delta
+    const calcResult = async (result) => {
+        server.debug(`*** calculation result ***`);
+        if (server.debug.enabled) {
+            server.debug(JSON.stringify(result));
+        }
+        watchArrival.rangeMax = srcPaths['navigation.course.arrivalCircle'] ?? -1;
+        watchArrival.value = result.gc?.distance ?? -1;
+        watchPassedDest.value = result.passedPerpendicular ? 1 : 0;
+        courseCalcs = result;
+        server.handleMessage(plugin.id, (0, delta_msg_1.buildDeltaMsg)(courseCalcs, config.calculations.method), server_api_1.SKVersion.v2);
+        server.debug(`*** course data delta sent***`);
+        if (!metaSent) {
+            server.handleMessage(plugin.id, buildMetaDeltaMsg(), server_api_1.SKVersion.v2);
+            server.debug(`*** meta delta sent***`);
+            metaSent = true;
+        }
+    };
+    const buildMetaDeltaMsg = () => {
+        const metas = [];
+        const calcPath = 'navigation.course.calcValues';
+        server.debug(`*** building meta delta ***`);
+        metas.push({
+            path: `${calcPath}.calcMethod`,
+            value: {
+                description: 'Calculation type used (GreatCircle or Rhumbline).'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.bearingTrackTrue`,
+            value: {
+                description: 'The bearing of a line between previousPoint and nextPoint, relative to true north.',
+                units: 'rad'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.bearingTrackMagnetic`,
+            value: {
+                description: 'The bearing of a line between previousPoint and nextPoint, relative to magnetic north.',
+                units: 'rad'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.crossTrackError`,
+            value: {
+                description: "The distance from the vessel's present position to the closest point on a line (track) between previousPoint and nextPoint. A negative number indicates that the vessel is currently to the left of this line (and thus must steer right to compensate), a positive number means the vessel is to the right of the line (steer left to compensate).",
+                units: 'm'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.previousPoint.distance`,
+            value: {
+                description: "The distance in meters between the vessel's present position and the previousPoint.",
+                units: 'm'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.distance`,
+            value: {
+                description: "The distance in meters between the vessel's present position and the nextPoint.",
+                units: 'm'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.bearingTrue`,
+            value: {
+                description: "The bearing of a line between the vessel's current position and nextPoint, relative to true north.",
+                units: 'rad'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.bearingMagnetic`,
+            value: {
+                description: "The bearing of a line between the vessel's current position and nextPoint, relative to magnetic north.",
+                units: 'rad'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.velocityMadeGood`,
+            value: {
+                description: 'The velocity component of the vessel towards the nextPoint.',
+                units: 'm/s'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.timeToGo`,
+            value: {
+                description: "Time in seconds to reach nextPoint's perpendicular with current speed & direction.",
+                units: 's'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.estimatedTimeOfArrival`,
+            value: {
+                description: 'The estimated time of arrival at nextPoint position.'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.route.timeToGo`,
+            value: {
+                description: 'Time in seconds to reach final destination with current speed & direction.',
+                units: 's'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.route.estimatedTimeOfArrival`,
+            value: {
+                description: 'The estimated time of arrival at final destination.'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.route.distance`,
+            value: {
+                description: 'The remaining distance along the route to reach the final destination.',
+                units: 'm'
+            }
+        });
+        metas.push({
+            path: `${calcPath}.targetSpeed`,
+            value: {
+                description: 'The average speed required to arrive at the destination at the targetArrivalTime.',
+                units: 'm/s'
+            }
+        });
+        return {
+            updates: [
+                {
+                    meta: metas
+                }
+            ]
+        };
+    };
+    // ********* Arrival circle events *****************
+    const onArrivalCircleEvent = (event) => {
+        server.debug(JSON.stringify(event));
+        if (!config.notifications.enableArrival) {
+            return;
+        }
+        const alarmMethod = config.notifications.sound
+            ? [server_api_1.ALARM_METHOD.sound, server_api_1.ALARM_METHOD.visual]
+            : [server_api_1.ALARM_METHOD.visual];
+        if (event.type === 'enter') {
+            if (srcPaths['navigation.position']) {
+                emitNotification(new alarms_1.NotificationMgr('navigation.course.arrivalCircleEntered', `Entered arrival zone: ${event.value.toFixed(0)}m < ${watchArrival.rangeMax.toFixed(0)}`, server_api_1.ALARM_STATE.alert, alarmMethod));
+            }
+        }
+        if (event.type === 'exit') {
+            emitNotification(new alarms_1.NotificationMgr('navigation.course.arrivalCircleEntered', null));
+        }
+    };
+    // ********* Passed Destination events *****************
+    const onPassedDestEvent = (event) => {
+        server.debug(JSON.stringify(event));
+        if (!config.notifications.enablePerpendicular) {
+            return;
+        }
+        const alarmMethod = config.notifications.sound
+            ? [server_api_1.ALARM_METHOD.sound, server_api_1.ALARM_METHOD.visual]
+            : [server_api_1.ALARM_METHOD.visual];
+        if (event.type === 'enter') {
+            if (srcPaths['navigation.position']) {
+                emitNotification(new alarms_1.NotificationMgr('navigation.course.perpendicularPassed', watchPassedDest.value === 1
+                    ? 'Next Point perpendicular has been passed.'
+                    : '', server_api_1.ALARM_STATE.alert, alarmMethod));
+            }
+        }
+        if (event.type === 'exit') {
+            emitNotification(new alarms_1.NotificationMgr('navigation.course.perpendicularPassed', null));
+        }
+    };
+    // send notification delta message
+    const emitNotification = (notification) => {
+        server.debug(JSON.stringify(notification?.message));
+        server.handleMessage(plugin.id, {
+            updates: [{ values: [notification.message] }]
+        });
+    };
+    return plugin;
+};
+//# sourceMappingURL=index.js.map
