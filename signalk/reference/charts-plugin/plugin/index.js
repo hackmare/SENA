@@ -209,6 +209,36 @@ const createPlugin = (app) => {
                                 description: 'Name of layer to display',
                                 type: 'string'
                             }
+                        },
+                        autoSeed: {
+                            type: 'boolean',
+                            title: 'Auto-seed based on vessel position',
+                            description: 'Enable automatic tile seeding centered on vessel position with a sliding window. Re-seeds when vessel drifts near edge of seeded area.',
+                            default: false
+                        },
+                        autoSeedZoom: {
+                            type: 'number',
+                            title: 'Auto-seed zoom level',
+                            description: 'Zoom level for auto-seeding tiles (only used if auto-seed is enabled)',
+                            minimum: 0,
+                            maximum: 28,
+                            default: 12
+                        },
+                        autoSeedWindowNm: {
+                            type: 'number',
+                            title: 'Auto-seed window size (nautical miles)',
+                            description: 'Size of the seeding box in nautical miles (e.g., 5 for a 5nm window)',
+                            minimum: 0.5,
+                            maximum: 100,
+                            default: 5
+                        },
+                        autoSeedEdgeThresholdNm: {
+                            type: 'number',
+                            title: 'Auto-seed edge threshold (nautical miles)',
+                            description: 'Distance from box edge to trigger re-seeding when vessel drifts (e.g., 1 for re-seed when <1nm from edge)',
+                            minimum: 0.1,
+                            maximum: 50,
+                            default: 1
                         }
                     }
                 }
