@@ -1,0 +1,13 @@
+{
+  "configuration": {
+    "notifications": {
+      "sound": true
+    },
+    "calculations": {
+      "method": "GreatCircle"
+    }
+  },
+  "enabled": true,
+  "enableLogging": false,
+  "enableDebug": false
+}

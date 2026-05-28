@@ -1,0 +1,118 @@
+{
+  "configuration": {
+    "zones": [
+      {
+        "active": true,
+        "key": "electrical.​batteries.​BMV.​capacity.​stateOfCharge",
+        "zones": [
+          {
+            "lower": 0,
+            "upper": 0.1,
+            "state": "emergency",
+            "method": [
+              "visual",
+              "sound"
+            ],
+            "message": "CHARGE BATT NOW"
+          },
+          {
+            "lower": 0.1,
+            "upper": 0.2,
+            "state": "alarm",
+            "method": [
+              "visual",
+              "sound"
+            ],
+            "message": "BAT LOW ALARM"
+          },
+          {
+            "lower": 0.5,
+            "upper": 0.75,
+            "state": "alert",
+            "method": [
+              "visual"
+            ],
+            "message": "BATT MID CAPACITY"
+          },
+          {
+            "lower": 0.75,
+            "upper": 1,
+            "state": "nominal",
+            "method": [
+              "visual"
+            ],
+            "message": "BATT MORE THAN 5 DAYS"
+          },
+          {
+            "lower": 0.3,
+            "upper": 0.5,
+            "state": "warn",
+            "method": [
+              "visual",
+              "sound"
+            ],
+            "message": "BATT BELOW HALF"
+          }
+        ]
+      },
+      {
+        "active": true,
+        "key": "electrical.​batteries.​BMV.​voltage​",
+        "zones": [
+          {
+            "lower": 22,
+            "upper": 20,
+            "state": "emergency",
+            "method": [
+              "visual",
+              "sound"
+            ],
+            "message": "BATTERIES OFF"
+          },
+          {
+            "lower": 24,
+            "upper": 24.5,
+            "state": "alarm",
+            "method": [
+              "visual",
+              "sound"
+            ],
+            "message": "BATT LOW"
+          },
+          {
+            "lower": 24.5,
+            "upper": 26,
+            "state": "warn",
+            "method": [
+              "visual",
+              "sound"
+            ],
+            "message": ""
+          },
+          {
+            "lower": 26,
+            "upper": 23.2,
+            "state": "nominal",
+            "method": [
+              "visual",
+              "sound"
+            ],
+            "message": ""
+          },
+          {
+            "lower": 29.2,
+            "upper": 30,
+            "state": "emergency",
+            "method": [
+              "visual",
+              "sound"
+            ],
+            "message": "24V BATT V TOO HIGH!"
+          }
+        ]
+      }
+    ]
+  },
+  "enabled": true,
+  "enableLogging": true
+}

@@ -1,0 +1,73 @@
+{
+  "configuration": {
+    "adapter": "hci0",
+    "transport": "le",
+    "duplicateData": true,
+    "discoveryTimeout": 30,
+    "discoveryInterval": 60,
+    "peripherals": [
+      {
+        "active": true,
+        "mac_address": "E0:F4:0F:EE:D6:CB",
+        "discoveryTimeout": 30,
+        "params": {
+          "name": "victron-12-12-30",
+          "encryptionKey": "46aae264203fa03d181f396a1618fd9b",
+          "sensorClass": "VictronACCharger"
+        }
+      },
+      {
+        "active": true,
+        "mac_address": "FE:5B:03:E2:F1:45",
+        "discoveryTimeout": 30,
+        "params": {
+          "name": "victron-12-24-15-charger",
+          "encryptionKey": "4534e3187d0d38a1001fb079958b8f72",
+          "sensorClass": "VictronACCharger"
+        },
+        "paths": {}
+      },
+      {
+        "active": true,
+        "mac_address": "DD:A9:07:2A:8A:CE",
+        "discoveryTimeout": 30,
+        "params": {
+          "name": "victron-50-mppt-solar",
+          "encryptionKey": "c1899f04e6c4aa81e935a61a6f894af1",
+          "sensorClass": "VictronACCharger"
+        }
+      },
+      {
+        "active": true,
+        "discoveryTimeout": 30,
+        "params": {
+          "noContactThreshold": 60,
+          "name": "SmartBMV HQ2313AAJWA",
+          "batteryID": "house",
+          "encryptionKey": "570615a351b899f079ff372d9a4aba39",
+          "sensorClass": "VictronBatteryMonitor",
+          "modelID": 46394
+        },
+        "paths": {
+          "RSSI": "sensors.{macAndName}.RSSI",
+          "current": "electrical.batteries.{batteryID}.current",
+          "power": "electrical.batteries.{batteryID}.power",
+          "voltage": "electrical.batteries.{batteryID}.voltage",
+          "alarm": "electrical.batteries.{batteryID}.alarm",
+          "consumed": "electrical.batteries.{batteryID}.capacity.ampHoursConsumed",
+          "soc": "electrical.batteries.{batteryID}.capacity.stateOfCharge",
+          "ttg": "electrical.batteries.{batteryID}.capacity.timeRemaining",
+          "starterVoltage": "electrical.batteries.starter.voltage"
+        },
+        "gattParams": {
+          "useGATT": false
+        },
+        "mac_address": "C5:94:38:BD:24:A0"
+      }
+    ],
+    "inactivityTimeout": 600
+  },
+  "enabled": false,
+  "enableLogging": false,
+  "enableDebug": false
+}

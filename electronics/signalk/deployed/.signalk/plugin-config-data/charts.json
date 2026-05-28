@@ -1,0 +1,81 @@
+{
+  "configuration": {
+    "chartPaths": [
+      "../charts/data"
+    ],
+    "cachePath": "/home/pi/charts/cache",
+    "onlineChartProviders": [
+      {
+        "name": "CHS ENC Maritime Charts",
+        "description": "Canadian Hydrographic Service ENCs",
+        "minzoom": 4,
+        "maxzoom": 20,
+        "serverType": "tilelayer",
+        "format": "png",
+        "url": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/chs/ENC_MaritimeChartService/MapServer/exts/MaritimeChartService/MapServer/export?f=image&format=png32&transparent=true&size=256,256&imageSR=3857&bboxSR=3857&bbox={bbox_3857}&layers=show:0,1,2,3,4,5,6,7,8,9,10,11,12",
+        "proxy": true,
+        "headers": [
+          "User-Agent: SignalK Charts"
+        ],
+        "style": "",
+        "layers": []
+      },
+      {
+        "name": "CHS NONNA 10 Bathymetry",
+        "description": "Canadian Hydrographic Service NONNA bathymetry, 10 m resolution",
+        "minzoom": 4,
+        "maxzoom": 20,
+        "serverType": "tilelayer",
+        "format": "png",
+        "url": "https://nonna-geoserver.data.chs-shc.ca/geoserver/wms?service=WMS&version=1.3.0&request=GetMap&layers=nonna:NONNA%2010&styles=raster&crs=EPSG:3857&bbox={bbox_3857}&width=256&height=256&format=image/png&transparent=true",
+        "proxy": true,
+        "headers": [
+          "User-Agent: SignalK Charts"
+        ],
+        "style": "",
+        "layers": []
+      }
+    ]
+  },
+  "chartPaths": [
+    "../charts/CHS/data",
+    "../charts/NET/data",
+    "../charts/NAAS/data"
+  ],
+  "cachePath": "/home/pi/.signalk/cache",
+  "onlineChartProviders": [
+    {
+      "name": "CHS ENC Maritime Charts",
+      "description": "Canadian Hydrographic Service ENCs",
+      "minzoom": 4,
+      "maxzoom": 20,
+      "serverType": "tilelayer",
+      "format": "png",
+      "url": "https://egisp.dfo-mpo.gc.ca/arcgis/rest/services/chs/ENC_MaritimeChartService/MapServer/exts/MaritimeChartService/MapServer/export?f=image&format=png32&transparent=true&size=256,256&imageSR=3857&bboxSR=3857&bbox={bbox_3857}&layers=show:0,1,2,3,4,5,6,7,8,9,10,11,12",
+      "proxy": true,
+      "headers": [
+        "User-Agent: SignalK Charts"
+      ],
+      "style": "",
+      "layers": []
+    },
+    {
+      "name": "CHS NONNA 10 Bathymetry",
+      "description": "Canadian Hydrographic Service NONNA bathymetry, 10 m resolution",
+      "minzoom": 4,
+      "maxzoom": 20,
+      "serverType": "tilelayer",
+      "format": "png",
+      "url": "https://nonna-geoserver.data.chs-shc.ca/geoserver/wms?service=WMS&version=1.3.0&request=GetMap&layers=nonna:NONNA%2010&styles=raster&crs=EPSG:3857&bbox={bbox_3857}&width=256&height=256&format=image/png&transparent=true",
+      "proxy": true,
+      "headers": [
+        "User-Agent: SignalK Charts"
+      ],
+      "style": "",
+      "layers": []
+    }
+  ],
+  "enabled": true,
+  "enableLogging": true,
+  "enableDebug": true
+}

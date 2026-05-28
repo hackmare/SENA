@@ -1,0 +1,93 @@
+{
+  "configuration": {
+    "inputSource": "nmea0183",
+    "deltaIntervalSec": 10,
+    "language": "en",
+    "displayTitle": "NMEA0183 Logger",
+    "logDirectory": "",
+    "apiPort": 3033,
+    "includeTimestamp": true,
+    "throttle": {
+      "aisThrottleSec": 11,
+      "gpsDedupRMC": true,
+      "vdoHeartbeatSec": 180
+    },
+    "fileManagement": {
+      "maxFileSizeMB": 50,
+      "compressAfterDays": 7,
+      "autoTrashDays": 30
+    },
+    "events": {
+      "evCourseEnabled": true,
+      "evCourseDeg": 30,
+      "evWindEnabled": true,
+      "evWindKn": 5,
+      "evEngineEnabled": true,
+      "evEngineRpmThreshold": 100,
+      "evBatteryEnabled": true,
+      "evBatteryLowV": 12
+    },
+    "sentenceFilter": {
+      "logAllSentences": false,
+      "logUnknownSentences": true
+    },
+    "sentencesNav": {
+      "log_GGA": true,
+      "log_GLL": true,
+      "log_RMC": true,
+      "log_RMB": true,
+      "log_VTG": true,
+      "log_GSA": true,
+      "log_GSV": true,
+      "log_ZDA": true,
+      "log_GNS": true
+    },
+    "sentencesCompass": {
+      "log_HDG": true,
+      "log_HDM": true,
+      "log_HDT": true
+    },
+    "sentencesWind": {
+      "log_MWV": true,
+      "log_MWD": true,
+      "log_VWR": true
+    },
+    "sentencesDepth": {
+      "log_DBT": true,
+      "log_DBS": true,
+      "log_DBK": true,
+      "log_DPT": true
+    },
+    "sentencesSpeed": {
+      "log_VHW": true
+    },
+    "sentencesWptRoute": {
+      "log_APB": true,
+      "log_BOD": true,
+      "log_BWC": true,
+      "log_BWR": true,
+      "log_RTE": true,
+      "log_WPL": true,
+      "log_XTE": true,
+      "log_XDR": true,
+      "log_RSA": true,
+      "log_RPM": true
+    },
+    "sentencesEnv": {
+      "log_MTW": true,
+      "log_MTA": true,
+      "log_MMB": true,
+      "log_MDA": true
+    },
+    "sentencesAIS": {
+      "log_VDM": true,
+      "log_VDO": true
+    },
+    "sentencesMisc": {
+      "log_TXT": true,
+      "log_TTM": true,
+      "log_TLL": true
+    }
+  },
+  "enabled": true
+}

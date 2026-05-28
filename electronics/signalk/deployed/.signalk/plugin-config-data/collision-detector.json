@@ -1,0 +1,11 @@
+{
+  "configuration": {
+    "velocityVectorLengthInMn": 15,
+    "timeouts": {
+      "PosFreshBefore": 60
+    }
+  },
+  "enabled": true,
+  "enableLogging": true,
+  "enableDebug": true
+}

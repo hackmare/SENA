@@ -1,0 +1,17 @@
+{
+  "configuration": {
+    "delay": 15,
+    "warningPercentage": 90,
+    "warningNotification": true,
+    "noPositionAlarmTime": 300,
+    "fudge": 5,
+    "bowHeight": 7,
+    "state": "emergency",
+    "incompleteAnchorAlarmTime": 30,
+    "on": true,
+    "radius": 130
+  },
+  "enabled": true,
+  "enableLogging": true,
+  "enableDebug": false
+}

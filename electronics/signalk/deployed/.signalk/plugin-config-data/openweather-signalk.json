@@ -1,0 +1,10 @@
+{
+  "configuration": {
+    "apikey": "SenaOpenPlotter",
+    "type": "full - complete openweathermap json",
+    "horizon": 24,
+    "offset": 1,
+    "current": true
+  },
+  "enabled": false
+}

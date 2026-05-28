@@ -1,0 +1,7 @@
+{
+  "configuration": {
+    "maxLines": 2000
+  },
+  "enabled": true,
+  "enableLogging": true
+}

@@ -102,6 +102,21 @@ To eliminate "not private" certificate warnings in your browser, you must **impo
 
 3. **Verify**: Visit `https://openplotter.local:3443` in Chrome/Firefox
 
+### Enterprise: Google Workspace Admin Console
+
+For managed Chrome devices on a Google Workspace domain, you can deploy the CA certificate to all devices automatically:
+
+1. **Navigate to Google Admin Console**:
+   - Go to https://admin.google.com/ac/networks/certificates/server-ca-certs
+   - Sign in with your domain admin account
+
+2. **Add the certificate**:
+   - Click "Add server CA certificate"
+   - Upload `openplotter-ca-cert.pem`
+   - Give it a name (e.g., "OpenPlotter-Local-CA")
+
+3. **Verify**: All managed Chrome devices on your domain will automatically trust the certificate for internal sites
+
 ## Getting the CA Certificate
 
 ### From the Pi (SSH)

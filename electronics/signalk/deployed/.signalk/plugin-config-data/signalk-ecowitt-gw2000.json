@@ -1,0 +1,11 @@
+{
+  "configuration": {
+    "host": "192.168.0.35",
+    "port": 80,
+    "pollInterval": 10,
+    "windAsTrue": false
+  },
+  "enabled": true,
+  "enableLogging": true,
+  "enableDebug": false
+}

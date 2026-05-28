@@ -1,0 +1,28 @@
+{
+  "configuration": {
+    "resolution": 15000,
+    "pointsToKeep": 2000,
+    "maxAge": 600,
+    "maxRadius": 50000,
+    "bootstrapFromHistory": true,
+    "pathChecks": {
+      "propulsion": null,
+      "sensors.gps.fromBow": null,
+      "sensors.gps.fromCenter": null,
+      "environment.tide": null
+    },
+    "state": "emergency",
+    "enableEngineCheck": false,
+    "anchorAlarmInterval": 0,
+    "noPositionAlarmTime": 60,
+    "bowAnchorRollerHeight": 5,
+    "transducerToKeel": 0,
+    "on": true,
+    "radius": 120,
+    "position": {
+      "latitude": 49.2886241141988,
+      "longitude": -122.85631746053699
+    }
+  },
+  "enabled": true
+}

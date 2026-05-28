@@ -1,0 +1,10 @@
+{
+  "configuration": {
+    "mode": "Server-time-and-Position-tz",
+    "invertTimezone": false,
+    "manualTzHours": 0,
+    "manualTzMinutes": 0,
+    "intervalMs": 5000
+  },
+  "enabled": true
+}

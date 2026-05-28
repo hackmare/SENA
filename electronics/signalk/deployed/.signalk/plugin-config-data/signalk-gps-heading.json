@@ -1,0 +1,53 @@
+{
+  "configuration": {
+    "portSource": "GPS-Primary.GN",
+    "stbdSource": "GPS-Secondary.GN",
+    "portDistanceFromBow": {
+      "value": 20.29,
+      "unit": "m"
+    },
+    "portDistanceAthwart": {
+      "value": 2.59,
+      "unit": "m"
+    },
+    "portHeightAboveWaterline": {
+      "value": 6.81,
+      "unit": "m"
+    },
+    "stbdDistanceFromBow": {
+      "value": 20,
+      "unit": "m"
+    },
+    "stbdDistanceAthwart": {
+      "value": 2.2,
+      "unit": "m"
+    },
+    "stbdHeightAboveWaterline": {
+      "value": 5.74,
+      "unit": "m"
+    },
+    "trimDegrees": 0,
+    "filterAlpha": 0.5,
+    "pathChecks": {
+      "propulsion": null,
+      "sensors.gps.fromBow": null,
+      "sensors.gps.fromCenter": null,
+      "environment.tide": null
+    },
+    "state": "emergency",
+    "enableEngineCheck": false,
+    "anchorAlarmInterval": 0,
+    "noPositionAlarmTime": 60,
+    "bowAnchorRollerHeight": 5,
+    "on": true,
+    "radius": 125,
+    "position": {
+      "latitude": 49.2886241141988,
+      "longitude": -122.85631746053699
+    },
+    "transducerToKeel": 0
+  },
+  "enabled": true,
+  "enableLogging": false,
+  "enableDebug": false
+}

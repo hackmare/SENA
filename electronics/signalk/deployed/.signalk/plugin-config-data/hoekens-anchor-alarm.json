@@ -1,0 +1,27 @@
+{
+  "configuration": {
+    "pathChecks": {
+      "propulsion": null,
+      "sensors.gps.fromBow": null,
+      "sensors.gps.fromCenter": null
+    },
+    "state": "emergency",
+    "enableEngineCheck": false,
+    "anchorAlarmInterval": 0,
+    "noPositionAlarmTime": 60,
+    "bowAnchorRollerHeight": 5,
+    "on": true,
+    "transducerToKeel": 0,
+    "connectionType": "WEBSOCKET",
+    "defaultBasemap": "Satellite",
+    "fleetFilterRadius": 500,
+    "position": {
+      "latitude": 49.282509344654486,
+      "longitude": -123.15785408020021
+    },
+    "zone": "{\"type\":\"circle\",\"radius\":138,\"position\":{\"latitude\":49.2824481056452,\"longitude\":-123.15890550613405}}",
+    "totalAnchorChainLength": 100
+  },
+  "enabled": true,
+  "enableLogging": false
+}

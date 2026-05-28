@@ -1,0 +1,40 @@
+{
+  "configuration": {
+    "options": {
+      "speedProp": {
+        "feature": "Speed ower ground (SOG)"
+      },
+      "depthProp": {
+        "feature": "Depth below transducer (DBT)"
+      },
+      "windProp": false,
+      "velocityVectorLengthInMn": 10,
+      "defaultMap": "world-coastline",
+      "defaultCenter": {
+        "latitude": 55.754,
+        "longitude": 37.62
+      },
+      "AISasMOB": true
+    },
+    "depthInData": {
+      "display": false,
+      "minvalue": 0,
+      "maxvalue": 10
+    },
+    "directory": {
+      "routeDir": "route",
+      "trackDir": "track",
+      "currTrackFirst": false
+    },
+    "timeouts": {
+      "useSystem": true,
+      "PosFreshBefore": 5,
+      "SpeedFreshBefore": 2,
+      "DepthFreshBefore": 2,
+      "WindFreshBefore": 2,
+      "aisFreshBefore": 600
+    }
+  },
+  "enabled": true,
+  "enableLogging": true
+}

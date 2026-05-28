@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# SSL certificates and private keys
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Backups
+*.backup
+*.bak
+*.old
+
+# Secrets and credentials
+security.json
+.npmrc
+
+# Logs
+*.log
+*.log.gz
+
+# Runtime databases
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.sqlite3
+
+# Runtime / temp
+debug

@@ -1,0 +1,85 @@
+{
+  "configuration": {
+    "default_ttl": 1,
+    "engine_instances": "port, starboard",
+    "battery_instances": "0",
+    "tank_instances": "fuel.0, fuel.1",
+    "air_instances": "outside",
+    "air": {
+      "Air density": false,
+      "outsidedewPoint": false,
+      "Heat Index": false,
+      "Wind Chill": false
+    },
+    "electrical": {
+      "batterPower0": false
+    },
+    "course data": {
+      "cog_magnetic": true,
+      "eta_waypoint": false,
+      "setDrift": false,
+      "steer_error": false,
+      "vmg_Wind": false,
+      "vmg_Wind_STW": false
+    },
+    "heading": {
+      "cog_true": false,
+      "heading": false,
+      "leeway": false,
+      "kFactor": 12,
+      "leewayAngle": false,
+      "magneticVariation": true
+    },
+    "traffic": {
+      "CPA": true,
+      "distanceToSelf": true,
+      "range": 1000,
+      "timelimit": 1800,
+      "distanceToSelfTimelimit": 3600,
+      "sendNotifications": true,
+      "notificationZones": []
+    },
+    "depth": {
+      "belowKeel": false,
+      "belowKeel_2": false,
+      "belowSurface": false,
+      "transducerToKeel": false
+    },
+    "propulsion": {
+      "economyport": false,
+      "economystarboard": false,
+      "portstate": false,
+      "starboardstate": false,
+      "propslipport": false,
+      "propslipstarboard": false
+    },
+    "moon": {
+      "Moon": true,
+      "forecastDays": 1
+    },
+    "sun": {
+      "Sun": true,
+      "Sun Time": true,
+      "forecastDays": 3
+    },
+    "tanks": {
+      "tankVolume_fuel.0": false,
+      "volume_unit": "litres",
+      "calibrations.fuel.0": [],
+      "tankVolume_fuel.1": false,
+      "calibrations.fuel.1": [],
+      "tankVolume2_fuel.0": false,
+      "tankVolume2_fuel.1": false
+    },
+    "wind": {
+      "directionMagnetic2": false,
+      "directionMagnetic": false,
+      "angleTrueWater": false,
+      "directionTrue": false,
+      "groundWind": true,
+      "groundWindDirection": false,
+      "windShift": false
+    }
+  },
+  "enabled": true
+}

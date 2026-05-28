@@ -1,0 +1,15 @@
+{
+  "configuration": {
+    "port": 1923,
+    "windTrue": false,
+    "temp1": "environment.outside.temperature",
+    "humidity1": "environment.outside.humidity",
+    "temp2": "environment.mainCabin.temperature",
+    "humidity2": "environment.mainCabin.humidity",
+    "temp3": "environment.refrigerator.temperature",
+    "humidity3": "environment.refrigerator.humidity"
+  },
+  "enabled": false,
+  "enableLogging": false,
+  "enableDebug": false
+}

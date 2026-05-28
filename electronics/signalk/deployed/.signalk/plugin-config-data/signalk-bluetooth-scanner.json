@@ -1,0 +1,8 @@
+{
+  "configuration": {
+    "useExternalScanner": false,
+    "scannerHost": "127.0.0.1",
+    "scannerUdpPort": 51234
+  },
+  "enabled": false
+}

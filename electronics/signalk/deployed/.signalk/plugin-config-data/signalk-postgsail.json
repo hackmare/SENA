@@ -1,0 +1,17 @@
+{
+  "configuration": {
+    "host": "https://api.openplotter.cloud/",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoidmVzc2VsX3JvbGUiLCJlbWFpbCI6Im0ub2dlckByb2l0c3lzdGVtcy5jYSIsInZpZCI6IjkwZTFjN2FmZmY3ZSJ9.LT3mpKKKT9Squ64UyjeMY6T2ib34Ry72eVXIUKQ_0vE",
+    "monitoring": {
+      "update_at": "2026-05-16T23:40:00Z",
+      "voltageKey": "electrical.batteries.ws90.voltage",
+      "insideHumidityKey": "environment.outside.humidity",
+      "outsideHumidityKey": "environment.outside.humidity",
+      "outsidePressureKey": "environment.outside.pressure",
+      "insideTemperatureKey": "environment.inside.temperature",
+      "outsideTemperatureKey": "environment.outside.temperature"
+    }
+  },
+  "enabled": true,
+  "enableLogging": false
+}

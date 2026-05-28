@@ -1,1 +1,0 @@
-{"version":3,"file":"delta-msg.d.ts","sourceRoot":"","sources":["../../src/lib/delta-msg.ts"],"names":[],"mappings":"AAAA,OAAO,EAAQ,SAAS,EAAE,MAAM,qBAAqB,CAAA;AACrD,OAAO,EAAE,UAAU,EAAE,MAAM,UAAU,CAAA;AAErC,MAAM,MAAM,UAAU,GAAG,aAAa,GAAG,WAAW,CAAA;AAuBpD;;;;;;;GAOG;AACH,wBAAgB,aAAa,CAAC,MAAM,EAAE,UAAU,EAAE,MAAM,EAAE,UAAU;;;;EA0DnE"}

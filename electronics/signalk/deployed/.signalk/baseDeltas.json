@@ -1,0 +1,56 @@
+[
+  {
+    "context": "vessels.self",
+    "updates": [
+      {
+        "values": [
+          {
+            "path": "",
+            "value": {
+              "name": "Sena II",
+              "mmsi": "316001125",
+              "communication": {
+                "callsignVhf": "CFG7275"
+              }
+            }
+          },
+          {
+            "path": "design.draft",
+            "value": {
+              "maximum": 3
+            }
+          },
+          {
+            "path": "design.length",
+            "value": {
+              "overall": 27
+            }
+          },
+          {
+            "path": "design.beam",
+            "value": 7.5
+          },
+          {
+            "path": "design.airHeight",
+            "value": 18
+          },
+          {
+            "path": "sensors.gps.fromBow",
+            "value": 13
+          },
+          {
+            "path": "sensors.gps.fromCenter",
+            "value": 3.5
+          },
+          {
+            "path": "design.aisShipType",
+            "value": {
+              "name": "Fishing",
+              "id": 30
+            }
+          }
+        ]
+      }
+    ]
+  }
+]

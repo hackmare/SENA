@@ -1,0 +1,13 @@
+{
+  "configuration": {
+    "sendNotifications": true,
+    "notificationStates": "WA, AK",
+    "notificationVisual": true,
+    "notificationSound": true,
+    "notificationState": "alert",
+    "forcastInterval": 3600,
+    "observationsInterval": 60,
+    "notificationsInterval": 60
+  },
+  "enabled": false
+}

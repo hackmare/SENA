@@ -1,0 +1,10 @@
+{
+  "configuration": {
+    "interval": 600,
+    "sudo": true,
+    "preferNetworkTime": true
+  },
+  "enabled": true,
+  "enableLogging": false,
+  "enableDebug": false
+}

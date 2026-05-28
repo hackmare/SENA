@@ -1,0 +1,18 @@
+{
+  "configuration": {
+    "apiKey": "94f08560b66cce5336da9f4596d3b5baec2f983e",
+    "boundingBoxSize": 4,
+    "moveRelatedBoundingBox": -3,
+    "refreshRate": 10,
+    "positionReport": true,
+    "shipStaticData": true,
+    "staticDataReport": true,
+    "standardClassBPositionReport": true,
+    "extendedClassBPositionReport": true,
+    "aidsToNavigationReport": true,
+    "baseStationReport": true
+  },
+  "enabled": true,
+  "enableLogging": false,
+  "enableDebug": false
+}

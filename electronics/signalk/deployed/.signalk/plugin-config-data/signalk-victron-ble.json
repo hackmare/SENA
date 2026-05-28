@@ -1,0 +1,33 @@
+{
+  "configuration": {
+    "devices": [
+      {
+        "id": "BMV",
+        "mac": "C5:94:38:BD:24:A0",
+        "key": "570615a351b899f079ff372d9a4aba39",
+        "secondary_battery": "24v House"
+      },
+      {
+        "id": "V-24-50-mppt",
+        "mac": "DD:A9:07:2A:8A:CE",
+        "key": "c1899f04e6c4aa81e935a61a6f894af1",
+        "secondary_battery": "24v House"
+      },
+      {
+        "id": "V-12-24-15",
+        "mac": "fe:5b:03:E2:F1:45",
+        "key": "4534e3187d0d38a1001fb079958b8f72",
+        "secondary_battery": "24v House"
+      },
+      {
+        "id": "V-12-12-30",
+        "mac": "E0:F4:0F:EE:D6:CB",
+        "key": "46aae264203fa03d181f396a1618fd9b",
+        "secondary_battery": "12v House"
+      }
+    ]
+  },
+  "enabled": false,
+  "enableLogging": false,
+  "enableDebug": false
+}

@@ -1,0 +1,106 @@
+{
+  "pipedProviders": [
+    {
+      "id": "GPS-Primary",
+      "enabled": true,
+      "pipeElements": [
+        {
+          "type": "providers/simple",
+          "options": {
+            "logging": false,
+            "type": "NMEA0183",
+            "subOptions": {
+              "type": "serial",
+              "baudrate": 38400,
+              "device": "/dev/ttyUSB0"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "GPS-Secondary",
+      "enabled": true,
+      "pipeElements": [
+        {
+          "type": "providers/simple",
+          "options": {
+            "logging": false,
+            "type": "NMEA0183",
+            "subOptions": {
+              "type": "serial",
+              "device": "/dev/ttyUSB1",
+              "baudrate": 38400
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "interfaces": {},
+  "resourcesApi": {
+    "defaultProviders": {
+      "routes": "resources-provider",
+      "waypoints": "resources-provider",
+      "regions": "resources-provider",
+      "notes": "resources-provider",
+      "charts": "resources-provider",
+      "tracks": "resources-provider",
+      "infolayers": "resources-provider",
+      "groups": "resources-provider"
+    }
+  },
+  "courseApi": {
+    "apiOnly": false
+  },
+  "port": 3000,
+  "sslport": 3443,
+  "ssl": true,
+  "sourcePriorities": {
+    "navigation.courseOverGroundTrue": [
+      {
+        "sourceRef": "GPS-Primary.GN",
+        "timeout": ""
+      },
+      {
+        "sourceRef": "GPS-Secondary.GN",
+        "timeout": "5000"
+      }
+    ],
+    "navigation.speedOverGround": [
+      {
+        "sourceRef": "GPS-Primary.GN",
+        "timeout": ""
+      },
+      {
+        "sourceRef": "GPS-Secondary.GN",
+        "timeout": "5000"
+      }
+    ],
+    "navigation.datetime": [
+      {
+        "sourceRef": "GPS-Primary.GN",
+        "timeout": ""
+      },
+      {
+        "sourceRef": "GPS-Secondary.GN",
+        "timeout": "4994"
+      }
+    ],
+    "navigation.headingTrue": [
+      {
+        "sourceRef": "signalk-gps-heading",
+        "timeout": ""
+      }
+    ],
+    "navigation.position": [
+      {
+        "sourceRef": "signalk-gps-heading",
+        "timeout": ""
+      }
+    ]
+  },
+  "security": {
+    "strategy": "./tokensecurity"
+  }
+}

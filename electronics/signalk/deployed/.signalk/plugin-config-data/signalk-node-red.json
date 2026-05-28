@@ -1,0 +1,9 @@
+{
+  "configuration": {
+    "logging": "info",
+    "requires": [],
+    "settings": []
+  },
+  "enabled": false,
+  "enableLogging": false
+}

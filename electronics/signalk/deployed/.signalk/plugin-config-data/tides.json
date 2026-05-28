@@ -1,0 +1,7 @@
+{
+  "configuration": {
+    "source": "neaps",
+    "period": 120
+  },
+  "enabled": true
+}

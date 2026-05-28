@@ -1,0 +1,13 @@
+{
+  "configuration": {
+    "default_ttl": 600,
+    "tides": {
+      "noaa": false,
+      "worldtides": true,
+      "worldtidesApiKey": "6d2fcc4f-a939-4980-bd26-d303359954f9"
+    }
+  },
+  "enabled": false,
+  "enableLogging": false,
+  "enableDebug": false
+}
